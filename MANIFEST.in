@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_the3dprintersuperhero/templates *
+recursive-include octoprint_the3dprintersuperhero/translations *
+recursive-include octoprint_the3dprintersuperhero/static *
