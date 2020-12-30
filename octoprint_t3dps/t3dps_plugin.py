@@ -257,10 +257,10 @@ class The3DPrinterSuperheroPlugin(
 				headers = req["headers"]
 				headers["X-Api-Key"] = self._settings.get(["octoprint_api_key"])
 				if req["method"] == "GET":
-					_logger.debug("on_message_received: Calling GET {}, headers: {}".format(url, headers))
+					_logger.debug("on_aws_message_received: Calling GET {}, headers: {}".format(url, headers))
 					response = requests.get(url, headers=headers)
 				elif req["method"] == "POST":
-					_logger.debug("on_message_received: Calling POST {}, headers: {}, body `{}`".format(url, headers, req["body"]))
+					_logger.debug("on_aws_message_received: Calling POST {}, headers: {}, body `{}`".format(url, headers, req["body"]))
 					response = requests.post(url, data=json.dumps(req["body"]), headers=headers)
 				results[name] = dict(
 					statusCode=response.status_code
