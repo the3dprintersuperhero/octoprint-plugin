@@ -209,11 +209,11 @@ class The3DPrinterSuperheroPlugin(
 			except:
 				pass
 
-	def on_connection_interrupted(self, connection, error, **kwargs):
-		_logger.warn("on_connection_interrupted: error: {}".format(error))
+	def on_aws_connection_interrupted(self, connection, error, **kwargs):
+		_logger.warn("on_aws_connection_interrupted: error: {}".format(error))
 
-	def on_connection_resumed(self, connection, session_present, **kwargs):
-		_logger.info("on_connection_resumed: session_present: {}".format(session_present))
+	def on_aws_connection_resumed(self, connection, return_code, session_present, **kwargs):
+		_logger.info("on_aws_connection_resumed: session_present: {}".format(session_present))
 
 		if return_code == mqtt.ConnectReturnCode.ACCEPTED and not session_present:
 			resubscribe_future, _ = connection.resubscribe_existing_topics()
@@ -221,16 +221,16 @@ class The3DPrinterSuperheroPlugin(
 			# evaluate result with a callback instead.
 			resubscribe_future.add_done_callback(self.on_resubscribe_complete)
 
-	def on_resubscribe_complete(self, resubscribe_future):
+	def on_aws_resubscribe_complete(self, resubscribe_future):
 		resubscribe_results = resubscribe_future.result()
-		_logger.debug("on_resubscribe_complete: results: {}".format(resubscribe_results))
+		_logger.debug("on_aws_resubscribe_complete: results: {}".format(resubscribe_results))
 
 		for topic, qos in resubscribe_results['topics']:
 			if qos is None:
-				_logger.warn("on_resubscribe_complete: Server rejected resubscribe to topic: {}".format(topic))
+				_logger.warn("on_aws_resubscribe_complete: Server rejected resubscribe to topic: {}".format(topic))
 
-	def on_message_received(self, topic, payload, **kwargs):
-		_logger.debug("on_message_received: Received message from topic '{}': {}".format(topic, payload))
+	def on_aws_message_received(self, topic, payload, **kwargs):
+		_logger.debug("on_aws_message_received: Received message from topic '{}': {}".format(topic, payload))
 
 		payloadStr=str(payload,"utf-8")
 		payloadJson=json.loads(payloadStr)
@@ -260,7 +260,7 @@ class The3DPrinterSuperheroPlugin(
 
 			except:
 				err = sys.exc_info()[0]
-				_logger.error("on_message_received: error: {}".format(err))
+				_logger.error("on_aws_message_received: error: {}".format(err))
 				results[name] = dict(
 					status_code= -1,
 					body= str(err)
@@ -269,7 +269,7 @@ class The3DPrinterSuperheroPlugin(
 
 		response_topic=payloadJson["responseTopic"]
 		response_payload=json.dumps(results)
-		_logger.debug("on_message_received: Publishing response: `{}` to topic: {}".format(response_payload, response_topic))
+		_logger.debug("on_aws_message_received: Publishing response: `{}` to topic: {}".format(response_payload, response_topic))
 		self.mqtt_connection.publish(
 			topic=response_topic,
 			payload=response_payload,
