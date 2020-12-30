@@ -182,8 +182,8 @@ class The3DPrinterSuperheroPlugin(
 				pri_key_bytes=str.encode(private_key),
 				client_bootstrap=client_bootstrap,
 				ca_bytes=str.encode(root_ca),
-				on_connection_interrupted=self.on_connection_interrupted,
-				on_connection_resumed=self.on_connection_resumed,
+				on_connection_interrupted=self.on_aws_connection_interrupted,
+				on_connection_resumed=self.on_aws_connection_resumed,
 				client_id=client_id,
 				clean_session=True)
 
@@ -199,7 +199,7 @@ class The3DPrinterSuperheroPlugin(
 			subscribe_future, packet_id = self.mqtt_connection.subscribe(
 				topic=topic,
 				qos=mqtt.QoS.AT_LEAST_ONCE,
-				callback=self.on_message_received )
+				callback=self.on_aws_message_received )
 			subscribe_result = subscribe_future.result()
 			_logger.debug("aws_connect: Subscribed with {}".format(str(subscribe_result['qos'])))
 
@@ -229,7 +229,7 @@ class The3DPrinterSuperheroPlugin(
 			resubscribe_future, _ = connection.resubscribe_existing_topics()
 			# Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
 			# evaluate result with a callback instead.
-			resubscribe_future.add_done_callback(self.on_resubscribe_complete)
+			resubscribe_future.add_done_callback(self.aws_resubscribe_complete)
 			global _connected
 			_connected = True
 
