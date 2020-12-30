@@ -15,9 +15,11 @@ import logging
 _logger = logging.getLogger('octoprint.plugins.t3dps')
 
 
-class The3DPrinterSuperheroPlugin(octoprint.plugin.StartupPlugin,
-						octoprint.plugin.SettingsPlugin,
-						octoprint.plugin.TemplatePlugin):
+class The3DPrinterSuperheroPlugin(
+	octoprint.plugin.StartupPlugin,
+	octoprint.plugin.SettingsPlugin,
+	octoprint.plugin.TemplatePlugin,
+	octoprint.plugin.EventHandlerPlugin):
 
 	def __init__(self):
 		_logger.info("__init__:")
@@ -106,13 +108,21 @@ class The3DPrinterSuperheroPlugin(octoprint.plugin.StartupPlugin,
 			dict(type="settings", custom_bindings=False)
 		]
 
+	# ~~ EventHandlerPlugin mixin ~~ #
+
+	def on_event(self, event, payload):
+		_logger.info("on_event: event: {}, payload: {}".format(event, payload))
+		if event == 'ConnectivityChanged':
+			if payload.new == True:
+				self.aws_connect()
+
 	# ~~ Softwareupdate hook
 
 	def get_update_information(self):
 		_logger.info("get_update_information:")
 		return dict(
 			t3dps=dict(
-				displayName="The 3D Printer Superhero Plugin",
+				displayName="The 3D Printer Superhero",
 				displayVersion=self._plugin_version,
 
 				# version check: github repository
