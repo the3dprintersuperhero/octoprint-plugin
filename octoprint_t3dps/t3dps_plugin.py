@@ -14,7 +14,6 @@ import threading
 
 
 _logger = logging.getLogger('octoprint.plugins.t3dps')
-_connected = False;
 
 class The3DPrinterSuperheroPlugin(
 	octoprint.plugin.StartupPlugin,
@@ -142,11 +141,6 @@ class The3DPrinterSuperheroPlugin(
 	def aws_connect(self):
 		_logger.info("aws_connect:")
 
-		global _connected
-		if _connected == True:
-			_logger.info("aws_connect: ignoring")
-			return
-
 		root_ca = self._settings.get(['root_ca'])
 		certificate_pem = self._settings.get(['certificate_pem'])
 		private_key = self._settings.get(['private_key'])
@@ -191,7 +185,6 @@ class The3DPrinterSuperheroPlugin(
 			connect_future.result()
 
 			_logger.debug("aws_connect: Connected!")
-			_connected = True
 
 			# Subscribe
 			topic = self.topic_template.format( client_id)
@@ -214,8 +207,6 @@ class The3DPrinterSuperheroPlugin(
 				disconnect_future = self.mqtt_connection.disconnect()
 				disconnect_future.result()
 				_logger.debug("aws_disconnect: Disconnected!")
-				global _connected
-				_connected = False
 			except:
 				pass
 
@@ -230,8 +221,6 @@ class The3DPrinterSuperheroPlugin(
 			# Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
 			# evaluate result with a callback instead.
 			resubscribe_future.add_done_callback(self.aws_resubscribe_complete)
-			global _connected
-			_connected = True
 
 	def on_aws_resubscribe_complete(self, resubscribe_future):
 		resubscribe_results = resubscribe_future.result()
